@@ -102,7 +102,9 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Generate timesheets for CS111 payroll')
 	parser.add_argument("date", type=str, nargs='?', help="end of pay period")
 	parser.add_argument("--config", default=os.getenv("HOME") + '/payroll.yaml', help="employee config file")
-	parser.add_argument("--output", help="output file")
+	group = parser.add_mutually_exclusive_group()
+	group.add_argument("--output", help="output file")
+	group.add_argument("--output_dir", help="output directory")
 	args = parser.parse_args()
 	
 	if args.date: 
@@ -120,7 +122,9 @@ if __name__ == '__main__':
 	
 	if args.output:
 		output = args.output
+	elif args.output_dir:
+		output = args.output_dir + '/' + config['last_name'] + '-' + end_date.strftime('%m-%d-%y')
 	else:
-		output = os.getenv("HOME") + "/" + config['last_name'] + '-' + end_date.strftime('%m-%d-%y')
+		output = os.getenv("HOME") + '/' + config['last_name'] + '-' + end_date.strftime('%m-%d-%y')
 	generate_pdf(fields, output)
 	print "Generated %s.pdf!" % (output)
