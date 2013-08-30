@@ -19,12 +19,12 @@ def hours_elapsed(start, end):
 	end_dec = end.hour + end.minute / 60.0
 	return end_dec - start_dec
 
-def generate_pdf(fields, output):
+def generate_pdf(fields, template, output):
 	fdf = forge_fdf('', fields.items(), [], [], [])
 	temp = tempfile.NamedTemporaryFile()
 	with open(temp.name, 'w') as fdf_file:
 		fdf_file.write(fdf)
-	getoutput('pdftk timesheet.pdf fill_form %s output %s.pdf flatten' % (fdf_file.name, output))
+	getoutput('pdftk %s fill_form %s output %s.pdf flatten' % (template, fdf_file.name, output))
 	fdf_file.close()
 	temp.close()
 
@@ -104,6 +104,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Generate timesheets for CS111 payroll')
 	parser.add_argument("date", type=str, nargs='?', help="end of pay period")
 	parser.add_argument("--config", default=os.getenv("HOME") + '/payroll.yaml', help="employee config file")
+	parser.add_argument("--template", default=os.path.dirname(os.path.realpath(__file__)) + '/timesheet.pdf', help="pdf template file")
 	group = parser.add_mutually_exclusive_group()
 	group.add_argument("--output", help="output file")
 	group.add_argument("--output_dir", help="output directory")
@@ -132,5 +133,5 @@ if __name__ == '__main__':
 		output = args.output_dir + '/' + prefix + '-' + end_date.strftime('%m-%d-%y')
 	else:
 		output = os.getenv("HOME") + '/' + prefix + '-' + end_date.strftime('%m-%d-%y')
-	generate_pdf(fields, output)
+	generate_pdf(fields, args.template, output)
 	print "Generated %s.pdf!" % (output)
