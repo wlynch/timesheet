@@ -1,4 +1,4 @@
-#!/usr/local/bin/python2.7
+#!/usr/bin/env python2.7
 from datetime import datetime, timedelta, time, date
 from fdfgen import forge_fdf
 from commands import getoutput
