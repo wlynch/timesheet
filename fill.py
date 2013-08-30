@@ -24,11 +24,12 @@ def hours_elapsed(start, end):
 
 	return end_dec - start_dec
 
-def generate_pdf(fields, name):
+def generate_pdf(fields, output):
 	fdf = forge_fdf('', fields.items(), [], [], [])
 	with open('data.fdf', 'w') as fdf_file:
 		fdf_file.write(fdf)
-	return getoutput('pdftk timesheet.pdf fill_form data.fdf output %s.pdf flatten' % (name))
+	message = getoutput('pdftk timesheet.pdf fill_form data.fdf output %s.pdf flatten' % (output))
+	os.remove(fdf_file.name)
 
 def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate, week):
 	curr_date = end_date
