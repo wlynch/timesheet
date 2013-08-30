@@ -1,27 +1,8 @@
 #!/usr/local/bin/python2.7
 from datetime import datetime, timedelta, time
-import pprint
 import yaml
 from fdfgen import forge_fdf
 from commands import getoutput
-
-pp = pprint.PrettyPrinter(indent=4)
-
-
-FIRST_NAME = 'William'
-LAST_NAME = 'Lynch'
-EMPLOYEE_ID = '1234'
-
-# Goes from monday to sunday
-WEEK = [
-	(),
-	(),
-	('13:00','16:00'),
-	(),
-	(),
-	(),
-	(),
-]
 
 def get_start_of_pay_period(date):
 	return date - timedelta(days=date.weekday(), weeks=1)
@@ -128,7 +109,6 @@ if __name__ == '__main__':
 	config = parse_yaml('example.py')
 	
 	fields = set_fields(start_date, end_date, config['first_name'], config['last_name'], config['employee_id'], config['payrate'], get_work_week(config))
-	#pp.pprint(fields)
 
 	name = end_date.strftime('%m-%d-%y')
 	generate_pdf(fields, name)
