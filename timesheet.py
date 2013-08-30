@@ -38,6 +38,7 @@ def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate
 			'First Name': first_name,
 			'Last Name': last_name,
 			'SS': employee_id,
+			'Rate': str(payrate),
 		}
 
 		# populate them dates.
@@ -81,7 +82,7 @@ def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate
 
 			all_hours += total_hours
 
-		fields['Comments'] = 'Peer Leader work with Andrew Tjang \n%.02f/hrs X $12/hr = $%.02f' % (all_hours, all_hours * 12.0)
+		fields['Comments'] = 'Peer Leader work with Andrew Tjang \n%.02f/hrs X $%.02f/hr = $%.02f' % (all_hours, payrate, all_hours * payrate)
 
 	return fields
 
@@ -94,8 +95,9 @@ def parse_yaml(config_file):
 def get_work_week(config):
 	weekdays = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
 	week = [(), (), (), (), (), (), ()]
-	for event in config['schedule']:
-		week[weekdays[event['day']]] = (event['start'], event['end'])
+	if config and 'schedule' in config:
+		for event in config['schedule']:
+			week[weekdays[event['day']]] = (event['start'], event['end'])
 	return week
 
 if __name__ == '__main__':
@@ -117,14 +119,18 @@ if __name__ == '__main__':
 	
 	config = parse_yaml(args.config)
 	week = get_work_week(config)
+	if config:
+		fields = set_fields(start_date, end_date, config.get('first_name', ''), config.get('last_name', ''), config.get('employee_id', ''), config.get('payrate', 0), week)
+		prefix = config.get('last_name', 'timesheet')
+	else:
+		fields = set_fields(start_date, end_date, '', '', '', 0, week)
+		prefix = 'timesheet'
 
-	fields = set_fields(start_date, end_date, config['first_name'], config['last_name'], config['employee_id'], config['payrate'], week)
-	
 	if args.output:
 		output = args.output
 	elif args.output_dir:
-		output = args.output_dir + '/' + config['last_name'] + '-' + end_date.strftime('%m-%d-%y')
+		output = args.output_dir + '/' + prefix + '-' + end_date.strftime('%m-%d-%y')
 	else:
-		output = os.getenv("HOME") + '/' + config['last_name'] + '-' + end_date.strftime('%m-%d-%y')
+		output = os.getenv("HOME") + '/' + prefix + '-' + end_date.strftime('%m-%d-%y')
 	generate_pdf(fields, output)
 	print "Generated %s.pdf!" % (output)
