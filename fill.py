@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta, time, date
 from fdfgen import forge_fdf
 from commands import getoutput
-import yaml, sys
+import argparse, os, sys, yaml
 
 def get_start_of_pay_period(date):
 	return date - timedelta(days=date.weekday(), weeks=1)
@@ -88,8 +88,10 @@ def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate
 	return fields
 
 def parse_yaml(config_file):
-	stream = open("example.yaml", 'r')
-	return yaml.load(stream)
+	stream = open(config_file, 'r')
+	config = yaml.load(stream)
+	stream.close()
+	return config
 
 def get_work_week(config):
 	weekdays = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
@@ -99,18 +101,21 @@ def get_work_week(config):
 	return week
 
 if __name__ == '__main__':
-	if len(sys.argv) > 1: 
-		due = sys.argv[1].rsplit('/')
+	parser = argparse.ArgumentParser(description='Generate timesheets for CS111 payroll')
+	parser.add_argument("date", type=str, nargs='?', help="end of pay period")
+	parser.add_argument("--config", default=os.getenv("HOME") + '/payroll.yaml', help="employee config file")
+	args = parser.parse_args()
+	
+	if args.date: 
+		due = args.date.rsplit('/')
 		end_date = datetime(day=int(due[1]), month=int(due[0]), year=int(due[2]))
 	else:
 		end_date = date.today()
-	end_date = end_date + timedelta(days=4-end_date.weekday())
+		end_date = end_date + timedelta(days=4-end_date.weekday())
 	start_date = end_date - timedelta(days=4, weeks=1)
-	print end_date
-	print start_date
-	config = parse_yaml('example.py')
+	
+	config = parse_yaml(args.config)
 	week = get_work_week(config)
-	print week
 
 	fields = set_fields(start_date, end_date, config['first_name'], config['last_name'], config['employee_id'], config['payrate'], week)
 
