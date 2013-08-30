@@ -2,10 +2,8 @@
 from datetime import datetime, timedelta, time, date
 from fdfgen import forge_fdf
 from commands import getoutput
+from tempfile import TemporaryFile
 import argparse, os, sys, yaml
-
-def get_start_of_pay_period(date):
-	return date - timedelta(days=date.weekday(), weeks=1)
 
 def format_date(date):
 	return date.strftime('%m/%d/%y')
@@ -17,24 +15,22 @@ def parse_time(string):
 	hour, minute = string.split(':')
 	return time(hour=int(hour), minute=int(minute))
 
-
 def hours_elapsed(start, end):
 	start_dec = start.hour + start.minute / 60.0
 	end_dec = end.hour + end.minute / 60.0
-
 	return end_dec - start_dec
 
 def generate_pdf(fields, output):
 	fdf = forge_fdf('', fields.items(), [], [], [])
-	with open('data.fdf', 'w') as fdf_file:
+	with TemporaryFile() as fdf_file:
 		fdf_file.write(fdf)
 	message = getoutput('pdftk timesheet.pdf fill_form data.fdf output %s.pdf flatten' % (output))
-	os.remove(fdf_file.name)
+	fdf_file.close()
 
 def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate, week):
 	curr_date = end_date
 	while(curr_date >= start_date):
-		start = get_start_of_pay_period(curr_date)
+		start = curr_date - timedelta(days=curr_date.weekday(), weeks=1)
 		curr_date -= timedelta(weeks=2)
 
 		fields = {
@@ -65,7 +61,6 @@ def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate
 				else:
 					num = str(7 + i + 1)
 
-				
 				if week[i]:
 					start_time = parse_time(week[i][0])
 					end_time = parse_time(week[i][1])
