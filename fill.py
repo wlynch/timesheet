@@ -104,6 +104,7 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Generate timesheets for CS111 payroll')
 	parser.add_argument("date", type=str, nargs='?', help="end of pay period")
 	parser.add_argument("--config", default=os.getenv("HOME") + '/payroll.yaml', help="employee config file")
+	parser.add_argument("--output", help="output file")
 	args = parser.parse_args()
 	
 	if args.date: 
@@ -118,7 +119,10 @@ if __name__ == '__main__':
 	week = get_work_week(config)
 
 	fields = set_fields(start_date, end_date, config['first_name'], config['last_name'], config['employee_id'], config['payrate'], week)
-
-	name = end_date.strftime('%m-%d-%y')
-	generate_pdf(fields, name)
-	print "Generated %s.pdf!" % (name)
+	
+	if args.output:
+		output = args.output
+	else:
+		output = os.getenv("HOME") + "/" + config['last_name'] + '-' + end_date.strftime('%m-%d-%y')
+	generate_pdf(fields, output)
+	print "Generated %s.pdf!" % (output)
