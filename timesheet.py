@@ -1,9 +1,8 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 from datetime import datetime, timedelta, time, date
 from fdfgen import forge_fdf
 from commands import getoutput
-from tempfile import TemporaryFile
-import argparse, os, sys, yaml
+import argparse, os, sys, tempfile, yaml
 
 def format_date(date):
 	return date.strftime('%m/%d/%y')
@@ -22,10 +21,12 @@ def hours_elapsed(start, end):
 
 def generate_pdf(fields, output):
 	fdf = forge_fdf('', fields.items(), [], [], [])
-	with TemporaryFile() as fdf_file:
+	temp = tempfile.NamedTemporaryFile()
+	with open(temp.name, 'w') as fdf_file:
 		fdf_file.write(fdf)
-	message = getoutput('pdftk timesheet.pdf fill_form data.fdf output %s.pdf flatten' % (output))
+	getoutput('pdftk timesheet.pdf fill_form %s output %s.pdf flatten' % (fdf_file.name, output))
 	fdf_file.close()
+	temp.close()
 
 def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate, week):
 	curr_date = end_date
@@ -67,6 +68,7 @@ def set_fields(start_date, end_date, first_name, last_name, employee_id, payrate
 
 					fields['F' + num] = format_time(start_time)
 					fields['T' + num] = format_time(end_time)
+					fields['Day' + num] = str(hours_elapsed(start_time, end_time))
 					
 					total_hours += hours_elapsed(start_time, end_time)
 
