@@ -97,7 +97,7 @@ def get_work_week(config):
 	week = [(), (), (), (), (), (), ()]
 	if config and 'schedule' in config:
 		for event in config['schedule']:
-			week[weekdays[event['day']]] = (event['start'], event['end'])
+			week[weekdays[event['day'].lower()]] = (event['start'], event['end'])
 	return week
 
 if __name__ == '__main__':
