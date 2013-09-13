@@ -45,6 +45,11 @@ Times do not have to be exact.
 If you have access to the [iLab machines](http://ilab.rutgers.edu), I have already installed the script in my 
 home directory for everyone to use.
 
+You can copy the template config file to your home directory by running:
+```
+cp ~wlynch92/src/timesheet/payroll.yaml ~/payroll.yaml
+```
+
 #### Example usage
 ```
 bash$ ~wlynch92/bin/timesheet
