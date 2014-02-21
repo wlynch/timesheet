@@ -52,7 +52,7 @@ cp ~wlynch92/src/timesheet/payroll.yaml ~/payroll.yaml
 
 #### Example usage
 ```
-bash$ ~wlynch92/bin/timesheet
+bash$ ~wlynch92/bin/timesheet 09/13/2013
 Generated /ilab/users/wlynch92/Lynch-09-13-13.pdf!
 ```
 
